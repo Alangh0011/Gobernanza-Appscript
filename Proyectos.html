@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <!-- Importación de fuentes -->
+    <link href="https://fonts.cdnfonts.com/css/delight-candles" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos generales para el cuerpo de la página */
+        body {
+            font-family: "Work Sans", sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        /* Contenedor principal que incluye el formulario y las tarjetas */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px; /* Espaciado entre las tarjetas y el formulario */
+        }
+
+        /* Estilos para el contenedor del formulario */
+        .form-container {
+            width: 300px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px; /* Separación con el resto de la interfaz */
+        }
+
+        /* Estilos para el título del formulario */
+        .form-container h3 {
+            margin-top: 0;
+            text-align: center;
+            color: black;
+        }
+
+        /* Estilos para los campos de entrada y textarea del formulario */
+        .form-container input, .form-container textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* Estilos para el botón de guardar en el formulario */
+        .form-container button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        /* Estilos específicos para el botón de guardar con hover */
+        .form-container .save-button {
+            background-color: #e50695;
+            color: white;
+        }
+
+        .form-container .save-button:hover {
+            background-color: #401051;
+        }
+
+        /* Contenedor de las tarjetas de proyectos */
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px; /* Espaciado entre las tarjetas */
+            flex-grow: 1;
+        }
+
+        /* Estilos para cada tarjeta de proyecto */
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 300px;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            color: black;
+        }
+
+        /* Estilos para la imagen dentro de la tarjeta */
+        .card img {
+            width: 80%;
+            height: auto;
+            margin: 20px 10%;
+            border-radius: 10px;
+        }
+
+        /* Estilos para el título dentro de la tarjeta */
+        .card h3 {
+            text-align: center;
+            margin: 10px 0;
+            color: black;
+        }
+
+        /* Estilos para el texto de responsable dentro de la tarjeta */
+        .card p {
+            text-align: center;
+            margin: 5px 0;
+            padding: 0 10px;
+            color: black;
+        }
+
+        /* Estilos para la descripción emergente dentro de la tarjeta */
+        .card .description {
+            display: none;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8); /* Fondo negro semitransparente */
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Efecto de hover para las tarjetas */
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Mostrar la descripción al hacer hover en la tarjeta */
+        .card:hover .description {
+            display: block;
+        }
+
+        /* Media Queries para Responsividad */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .cards-container {
+                justify-content: center;
+            }
+            .form-container, .card {
+                width: 300px; /* Mantiene el tamaño fijo de las tarjetas */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Formulario para crear una nueva tarjeta -->
+        <div class="form-container">
+            <h3>Crear nueva carta</h3>
+            <form id="createForm">
+                <!-- Campos de entrada para el nuevo proyecto -->
+                <input type="text" id="name" placeholder="Nombre" required>
+                <input type="text" id="liga" placeholder="Liga" required>
+                <textarea id="descripcion" placeholder="Descripción" required></textarea>
+                <input type="text" id="responsable" placeholder="Responsable" required>
+                <input type="text" id="imagen" placeholder="Imagen URL" required>
+                <input type="text" id="fondo" placeholder="Fondo URL" required>
+                <!-- Botón para crear la nueva tarjeta -->
+                <button type="submit" class="save-button">Crear</button>
+            </form>
+        </div>
+
+        <!-- Contenedor donde se mostrarán las tarjetas de proyectos -->
+        <div class="cards-container" id="projectsContainer"></div>
+    </div>
+
+    <script>
+        /**
+         * Función para crear una tarjeta de proyecto.
+         * @param {Object} project - Objeto que contiene los detalles del proyecto.
+         * @return {HTMLElement} - Retorna la tarjeta creada como un elemento HTML.
+         */
+        function createCard(project) {
+            var card = document.createElement('div');
+            card.className = 'card';
+            
+            card.style.backgroundImage = 'url(' + project.fondo + ')'; // Establecer el fondo de la tarjeta
+            
+            var img = document.createElement('img');
+            img.src = project.imagen;
+            card.appendChild(img);
+            
+            var title = document.createElement('h3');
+            title.textContent = project.nombre;
+            card.appendChild(title);
+            
+            var responsable = document.createElement('p');
+            responsable.textContent = 'Responsable: ' + project.responsable;
+            card.appendChild(responsable);
+            
+            var descripcion = document.createElement('div');
+            descripcion.className = 'description';
+            descripcion.textContent = project.descripcion;
+            card.appendChild(descripcion);
+            
+            // Añadir evento de clic para abrir la liga del proyecto en una nueva pestaña
+            card.addEventListener('click', function() {
+                window.open(project.liga, '_blank');
+            });
+            
+            return card;
+        }
+
+        /**
+         * Función para mostrar todas las tarjetas de proyectos.
+         * @param {Array} projects - Lista de proyectos a mostrar.
+         */
+        function displayProjects(projects) {
+            var container = document.getElementById('projectsContainer');
+            container.innerHTML = ''; // Limpiar el contenedor antes de agregar las nuevas tarjetas
+            projects.forEach(function(project) {
+                var card = createCard(project);
+                container.appendChild(card);
+            });
+        }
+
+        /**
+         * Función para agregar un nuevo proyecto y refrescar la lista de tarjetas.
+         * @param {Object} project - Objeto que contiene los detalles del proyecto.
+         */
+        function addProject(project) {
+            google.script.run.withSuccessHandler(function() {
+                google.script.run.withSuccessHandler(displayProjects).getProjects();
+                // Limpiar el formulario después de guardar el proyecto
+                document.getElementById('createForm').reset();
+            }).addProject(project);
+        }
+
+        // Evento de envío del formulario para crear un nuevo proyecto
+        document.getElementById('createForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var project = {
+                nombre: document.getElementById('name').value,
+                liga: document.getElementById('liga').value,
+                descripcion: document.getElementById('descripcion').value,
+                responsable: document.getElementById('responsable').value,
+                imagen: document.getElementById('imagen').value,
+                fondo: document.getElementById('fondo').value
+            };
+            
+            // Validar que todos los campos estén llenos
+            if (!project.nombre || !project.liga || !project.descripcion || !project.responsable || !project.imagen || !project.fondo) {
+                alert("Por favor, llena todos los campos.");
+                return;
+            }
+            
+            addProject(project);
+        });
+
+        // Cargar y mostrar los proyectos al cargar la página
+        google.script.run.withSuccessHandler(displayProjects).getProjects();
+    </script>
+</body>
+</html>

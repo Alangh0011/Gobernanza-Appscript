@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://fonts.cdnfonts.com/css/delight-candles" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+      
+      *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: font-family: "Work Sans", sans-serif;
+      }
+
+      body, html {
+        height: 100%;
+        background-color: white;
+      }
+
+      .flex-container {
+        display: flex;
+        width: 100%;
+        height: 100vh;
+      }
+
+      .form-section {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-top: 1rem;
+        position: relative;
+        background: url('https://raw.githubusercontent.com/Alangh0011/Gobernanza-Appscript/main/images/fondo%20morado.png') no-repeat center center;
+        background-size: cover;
+      }
+
+      .form-container {
+        background: rgba(255, 255, 255, 0.6); /* Fondo blanco con transparencia */
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3); /* Borde con transparencia */
+        text-align: center;
+        width: 80%;
+        max-width: 400px;
+        z-index: 1;
+      }
+
+      @import url('https://fonts.cdnfonts.com/css/delight-candles');
+      .title {
+        font-family: 'Delight Candles', sans-serif;
+        font-size: 3rem; /* Tamaño reducido */
+        font-weight: 600;
+        color: white;
+        text-align: center; /* Alineado al centro */
+        margin-bottom: 2rem; /* Espaciado inferior */
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem; /* Espaciado entre inputs */
+      }
+
+      .input-icon {
+        position: relative;
+        width: 100%;
+      }
+
+      .input-icon .icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        fill: #742280; /* Asegúrate de que el ícono tenga el color adecuado */
+      }
+
+      .input {
+        width: 100%;
+        padding: 0.5rem 1rem 0.5rem 2.5rem; /* Espacio para el ícono */
+        border: 2px solid #e50695; /* Color del borde */
+        border-radius: 0.5rem;
+        background: transparent;
+        margin-top: 0.5rem;
+        color: #742280; /* Color del texto */
+      }
+
+      .options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem; /* Espaciado superior */
+      }
+
+      .remember-me {
+        display: flex;
+        align-items: center;
+      }
+
+      .checkbox {
+        margin-right: 0.5rem;
+      }
+
+      .remember-label {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #742280; /* Color del texto */
+      }
+
+      .forgot-password {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #742280; /* Color del texto */
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.2s ease-in-out, text-decoration 0.2s ease-in-out;
+      }
+
+      .forgot-password:hover {
+        color: #FF6F20; /* Color al pasar el cursor */
+        text-decoration: underline; /* Subrayado al pasar el cursor */
+      }
+
+      .action-buttons {
+        margin-top: 1rem; /* Espaciado superior */
+      }
+
+      .sign-in-button {
+        width: 100%;
+        padding: 0.5rem 0;
+        border: none;
+        border-radius: 0.5rem;
+        background: #e50695;
+        color: white;
+        font-size: 1.125rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out;
+        margin-top: 1rem; /* Espaciado superior */
+      }
+
+      .sign-in-button:hover {
+        transform: scale(1.05);
+        background-color: #401051;
+      }
+
+      .explore-button:hover {
+        transform: scale(1.05);
+      }
+
+      .explore-button {
+        width: 100%;
+        padding: 0.5rem 0;
+        border: none;
+        border-radius: 0.5rem;
+        background: #742280;
+        color: white;
+        font-size: 1.125rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+        margin-top: 1rem; /* Espaciado superior */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .explore-button:hover {
+        background-color: #C59BD3;
+      }
+
+      .explore-button .button-icon {
+        width: 24px; /* Tamaño del ícono */
+        height: 24px;
+        margin-left: 10px; /* Espaciado entre el texto y el ícono */
+      }
+
+      .canvas-section {
+        display: none;
+      }
+
+      .background-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      @media (min-width: 1024px) {
+        .form-section {
+          width: 50%;
+        }
+
+        .canvas-section {
+          display: flex;
+          width: 50%;
+          justify-content: center;
+          align-items: center;
+        }
+      }
+
+      /* Estilos para el modal */
+      .modal {
+        display: none; /* Oculto por defecto */
+        position: fixed; /* Posicionamiento fijo */
+        z-index: 1000; /* Asegurarse de que se superponga a otros elementos */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5); /* Fondo negro con opacidad */
+      }
+
+      .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto; /* Centramos el modal vertical y horizontalmente */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 90%; /* Ancho del modal */
+        max-width: 600px; /* Ancho máximo */
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+      }
+
+      .responsive-iframe {
+        width: 100%;
+        height: 315px; /* Altura fija para asegurar la relación de aspecto */
+      }
+
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+<body>
+    <div class="flex-container">
+        <div class="form-section">
+            <h1 class="title">Gestión de proyectos</h1>
+            <div class="form-container">
+                <div class="input-group">
+                  <form class="input-group" id="loginForm">
+                    <div class="input-icon">
+                      <img src="https://espaciodeaprendizaje.alcion.mx/login/entrar/recursos/usuario.svg" class="icon" alt="Usuario">
+                      <input class="input" type="text" id="name" placeholder='Usuario' autofocus name='username' required>
+                    </div>
+                    <div class="input-icon">
+                      <img src="https://espaciodeaprendizaje.alcion.mx/login/entrar/recursos/Contrasena.svg" class="icon" alt="Contraseña">
+                      <input class="input" type='password' id="password" placeholder='**************' name='password' required>
+                    </div>
+                    <button class="sign-in-button" type='submit'> ACCEDER </button>
+                  </form>
+                  <p id="error" style="color: red;"></p> <!-- Elemento para mostrar errores -->
+                  <div class="action-buttons">
+                  </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="canvas-section">
+            <img src="https://raw.githubusercontent.com/Alangh0011/Gobernanza-Appscript/main/images/Login%20Gobernanza%20der.png" alt="fondo" class="background-image">
+        </div>
+    </div>
+    <script>
+      var url = 'https://script.google.com/a/macros/suburbia.com.mx/s/AKfycbznDqm66MbXSqHvpNn3La0ambT_YjqNka73qpPkJs5Al3Qvnnmiv6UGclYVyHlUaG5b/exec?page=proyectos'
+      
+      document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var name = document.getElementById('name').value;
+        var password = document.getElementById('password').value;
+        google.script.run.withSuccessHandler(function(success) {
+          if (success) {
+            // Redirigir a la URL absoluta de proyectos.html
+            window.top.location = url
+          } else {
+            document.getElementById('error').innerText = 'Nombre o contraseña incorrectos';
+          }
+        }).checkLogin(name, password);
+      });
+
+      function openModal() {
+    document.getElementById("myModal").style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("myModal").style.display = "none";
+}
+    </script>
+</body>
+</html>
