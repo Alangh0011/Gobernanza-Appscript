@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.cdnfonts.com/css/delight-candles" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script>
+    function onLoad() {
+      google.script.run.withSuccessHandler(displayCards).getGovernanceFCDataForClient();
+      google.script.run.withSuccessHandler(drawChart).getFCPercentageForClient();
+    }
+
+    function displayCards(data) {
+      console.log(data); // Verifica los datos en la consola del navegador
+      var container = document.getElementById('cards-container');
+      container.innerHTML = '';
+
+      data.forEach(function(item) {
+        var card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h3>${item.mes}</h3>
+          <p>Contrato: ${item.contratos}</p>
+          <p>Facturas: ${item.facturas}</p>
+          <p>Porcentaje: ${item.porcentaje}</p>
+          <div class="progress-bar">
+            <div class="progress" style="width: ${item.porcentaje}%; background-color: #c1ea4e;"></div>
+          </div>
+        `;
+        card.onclick = function() {
+          console.log(item);
+          openModal(item);
+        };
+        container.appendChild(card);
+      });
+    }
+
+
+    function openModal(item) {
+      var isEdit = item !== undefined;
+      document.getElementById('modal-id').value = isEdit ? item.id : '';
+      document.getElementById('modal-mes').value = isEdit ? item.mes : '';
+      document.getElementById('modal-contratos').value = isEdit ? item.contratos : '';
+      document.getElementById('modal-facturas').value = isEdit ? item.facturas : '';
+      document.getElementById('modal-pagos').value = isEdit ? item.pagos : '';
+      document.getElementById('modal-proyectos').value = isEdit ? item.proyectos : '';
+      document.getElementById('modal').dataset.isEdit = isEdit;
+      document.getElementById('modal-container').style.display = 'flex';
+    }
+
+    function saveChanges() {
+      var isEdit = document.getElementById('modal').dataset.isEdit === 'true';
+      var data = {
+        id: document.getElementById('modal-id').value,
+        mes: document.getElementById('modal-mes').value,
+        contratos: document.getElementById('modal-contratos').value,
+        facturas: document.getElementById('modal-facturas').value,
+        pagos: document.getElementById('modal-pagos').value,
+        proyectos: document.getElementById('modal-proyectos').value
+      };
+
+      if (isEdit) {
+        google.script.run.withSuccessHandler(onActionComplete).handleUpdateFC(data);
+      } else {
+        google.script.run.withSuccessHandler(onActionComplete).handleAddFC(data);
+      }
+    }
+
+
+
+    function deleteEntry() {
+      document.getElementById('confirm-delete-container').style.display = 'flex';
+    }
+
+    function confirmDelete() {
+      var id = document.getElementById('modal-id').value;
+      google.script.run.withSuccessHandler(onActionComplete).handleDeleteFC(id);
+      document.getElementById('confirm-delete-container').style.display = 'none';
+    }
+
+    function cancelDelete() {
+      document.getElementById('confirm-delete-container').style.display = 'none';
+    }
+
+    function closeModal() {
+      document.getElementById('modal-container').style.display = 'none';
+    }
+
+    function openAddModal() {
+      openModal(); // Open the modal with empty fields
+    }
+
+    function onActionComplete() {
+      closeModal(); // Cerrar el modal
+      onLoad(); // Vuelve a cargar los datos para reflejar los cambios
+    }
+
+    function drawChart(percentage) {
+  console.log(percentage); // Verifica el valor del porcentaje
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(function() {
+    var data = google.visualization.arrayToDataTable([
+      ['Task', 'Percentage'],
+      ['Porcentaje ya trabajado', percentage],
+      ['Porcentaje faltante', 100 - percentage]
+    ]);
+
+    var options = {
+      pieHole: 0.4,
+      colors: ['#c1ea4e', '#dcdcdc'],
+      legend: {
+        position: 'bottom'
+      },
+      chartArea: {
+        width: '90%',
+        height: '80%'
+      },
+      responsive: true
+    };
+
+    var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
+    chart.draw(data, options);
+  });
+}
+    window.onload = onLoad;
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+      var modalContainer = document.getElementById('modal-container');
+      var confirmDeleteContainer = document.getElementById('confirm-delete-container');
+      if (event.target == modalContainer) {
+        closeModal();
+      } else if (event.target == confirmDeleteContainer) {
+        cancelDelete();
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: "Work Sans", sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://raw.githubusercontent.com/Alangh0011/Gobernanza-Appscript/main/images/Fondo%20(1).png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 20px auto;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    h1 {
+        font-family: 'Delight Candles', sans-serif;
+        font-size: 3rem;
+        font-weight: 600;
+        color: #401051;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .add-button, .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background-color: #e50695;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .add-button:hover {
+      background-color: #401051;
+    }
+    .back-button:hover {
+      background-color: #401051;
+    }
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.2s;
+    cursor: pointer;
+    max-height: 180px; /* Limitar la altura máxima de la tarjeta */
+    overflow: hidden;  /* Esconder el desbordamiento */
+    background-image: url('https://raw.githubusercontent.com/Alangh0011/Gobernanza-Appscript/main/images/card-horizontal/Tarjeta%20horizontal.png'); /* Imagen de fondo */
+    background-size: cover; /* Ajustar la imagen de fondo */
+    background-position: center; /* Centrar la imagen */
+  }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    .card p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #555;
+       white-space: nowrap; /* Evita el salto de línea */
+      overflow: hidden;    /* Oculta el texto que se desborda */
+      text-overflow: ellipsis; /* Agrega "..." al final del texto que se corta */
+    }
+    /* Ajuste para pantallas más pequeñas */
+    @media only screen and (max-width: 768px) {
+      .card {
+        max-height: 150px;
+      }
+    }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background-color: #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress {
+      height: 100%;
+      background-color: #ff3ea2;
+    }
+    #modal-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #modal {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+      max-height: 90%;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    #modal label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #modal input, #modal textarea {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #modal button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #modal .save-button {
+      background-color: #228673;
+      color: white;
+    }
+    #modal .save-button:hover {
+      background-color: #228673;
+    }
+    #modal .cancel-button {
+      background-color: #6c757d;
+      color: white;
+      margin-left: 10px;
+    }
+    #modal .cancel-button:hover {
+      background-color: #5a6268;
+    }
+    #modal .delete-button {
+      background-color: #ff3ea2;
+      color: white;
+      margin-left: auto;
+    }
+    #modal .delete-button:hover {
+      background-color: #f150a1;
+    }
+    #confirm-delete-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1100;
+    }
+    #confirm-delete {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    #confirm-delete button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #confirm-delete .confirm-button {
+      background-color: #dc3545;
+      color: white;
+    }
+    #confirm-delete .confirm-button:hover {
+      background-color: #c82333;
+    }
+    #confirm-delete .cancel-button {
+      background-color: #742280;
+      color: white;
+      margin-left: 10px;
+    }
+    #confirm-delete .cancel-button:hover {
+      background-color: #81388c;
+    }
+     #donutchart {
+    width: 100%;
+    height: 600px; /* Tamaño grande por defecto */
+    max-width: 700px; /* Máximo para pantallas grandes */
+    margin-top: 20px;
+    justify-content: center;
+    justify-content: center;
+    align-items: center;
+  }
+  /* Ajustes para pantallas más pequeñas */
+  @media only screen and (max-width: 1200px) {
+    #donutchart {
+      height: 500px;
+      max-width: 600px;
+    }
+  }
+  @media only screen and (max-width: 768px) {
+    #donutchart {
+      height: 400px;
+      max-width: 500px;
+    }
+  }
+  @media only screen and (max-width: 480px) {
+    #donutchart {
+      height: 300px; /* Tamaño más pequeño para móviles */
+      max-width: 400px;
+    }
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+     <h1>Gobernanza de los proyectos de Fabrica de contenidos</h1>
+    <button class="add-button" onclick="openAddModal()">+ Agregar</button>
+    <div id="cards-container" class="cards-container"></div>
+  </div>
+  <div id="donutchart"></div>
+  <div id="modal-container">
+    <div id="modal">
+      <input type="hidden" id="modal-id">
+      
+      <!-- Modificar campos aquí -->
+      <label>Mes:</label>
+      <input type="text" id="modal-mes"><br>
+      
+      <label>Contratos:</label>
+      <input type="text" id="modal-contratos"><br>
+      
+      <label>Facturas:</label>
+      <input type="text" id="modal-facturas"><br>
+      
+      <label>Pagos:</label>
+      <input type="text" id="modal-pagos"><br>
+      
+      <label>Proyectos:</label>
+      <input type="text" id="modal-proyectos"><br>
+      
+      <!-- Puedes eliminar los campos adicionales innecesarios -->
+      <!-- Botones -->
+      <div style="display: flex; justify-content: space-between;">
+        <button class="save-button" onclick="saveChanges()">Guardar</button>
+        <button class="cancel-button" onclick="closeModal()">Cancelar</button>
+        <button class="delete-button" onclick="deleteEntry()">Eliminar</button>
+      </div>
+    </div>
+</div>
+  <div id="confirm-delete-container">
+    <div id="confirm-delete">
+      <p>¿Seguro que quieres eliminar?</p>
+      <button class="confirm-button" onclick="confirmDelete()">Eliminar</button>
+      <button class="cancel-button" onclick="cancelDelete()">Cancelar</button>
+    </div>
+  </div>
+</body>
+</html>

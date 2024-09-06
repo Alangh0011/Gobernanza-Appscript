@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://fonts.cdnfonts.com/css/delight-candles" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: "Work Sans", sans-serif;
+        background-image: url('https://raw.githubusercontent.com/Alangh0011/Gobernanza-Appscript/main/images/Fondo%20(1).png');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+      }
+      .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 1em;
+      }
+
+      .title {
+        font-family: 'Delight Candles', sans-serif;
+        font-size: 3rem;
+        font-weight: 600;
+        color: #401051;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .back-button {
+        display: inline-block;
+        margin-bottom: 1em;
+        padding: 0.5em 1em;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+        text-decoration: none;
+        color: #e50695;
+        transition: background-color 0.2s, color 0.2s;
+      }
+      .back-button:hover {
+        background-color: #401051;
+        color: #fff;
+      }
+      .chart-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2em;
+      }
+      .chart-box {
+        width: 45%;
+      }
+      .cards-container {
+        width: 45%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin: 1em;
+        overflow: hidden;
+        transition: transform 0.2s;
+        flex: 0 1 calc(50% - 2em); /* Default: 2 cards per row */
+        box-sizing: border-box;
+        text-align: center;
+        cursor: pointer;
+        height: 300px;
+        position: relative;
+        background-size: cover;
+        background-position: center;
+      }
+      .card p {
+        margin: 0.5em;
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: none;
+      }
+      .card:hover p {
+        display: block;
+      }
+      .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .chart-box-bar {
+        max-width: 100%;
+        margin-top: 3em;
+      }
+
+      /* Media Queries para Responsividad */
+      @media (max-width: 1200px) {
+        .card {
+          flex: 0 1 calc(50% - 2em); /* 2 cards per row */
+        }
+        .chart-container {
+          flex-direction: column;
+          align-items: center;
+        }
+        .chart-box, .cards-container {
+          width: 100%;
+        }
+      }
+      @media (max-width: 768px) {
+        .card {
+          flex: 0 1 calc(100% - 2em); /* 1 card per row */
+        }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="title">Gobernanza</h2>
+
+      <div class="chart-container">
+        <div class="chart-box">
+          <h3>Estatus general de proyectos</h3>
+          <canvas id="progressChart"></canvas>
+        </div>
+        <div class="cards-container" id="categoriesContainer"></div>
+      </div>
+
+      <div class="chart-box-bar">
+        <h3>Estatus por categoría</h3>
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </div>
+
+    <script>
+      function createCard(category) {
+        var card = document.createElement('div');
+        card.className = 'card';
+        
+        card.style.backgroundImage = 'url(' + category.imagen + ')'; // Establecer la imagen de fondo
+        
+        var descripcion = document.createElement('p');
+        descripcion.textContent = category.descripcion;
+        card.appendChild(descripcion);
+        
+        card.addEventListener('click', function() {
+          window.open(category.pagina, '_blank');
+        });
+        
+        return card;
+      }
+
+      function displayCategories(categories) {
+        var container = document.getElementById('categoriesContainer');
+        categories.forEach(function(category) {
+          var card = createCard(category);
+          container.appendChild(card);
+        });
+      }
+
+      function renderChart(total) {
+        var ctx = document.getElementById('progressChart').getContext('2d');
+        var data = {
+          datasets: [{
+            data: [total, 100 - total],
+            backgroundColor: ['#742280', '#DDDDDD']
+          }],
+          labels: ['Porcentaje ya trabajado', 'Porcentaje restante']
+        };
+        var options = {
+          cutout: '50%',
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            }
+          }
+        };
+        var myDoughnutChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: data,
+          options: options
+        });
+      }
+
+      function renderBarChart(categories, percentages) {
+        var ctx = document.getElementById('categoryChart').getContext('2d');
+        var data = {
+          labels: categories,
+          datasets: [{
+            label: 'Porcentaje por categoría',
+            data: percentages,
+            backgroundColor: [
+              '#ff6f20',  // Naranja para "Cultura"
+              '#ff3ea2',  // Rosa para "Normativos"
+              '#742280',  // Morado para "Técnicos"
+              '#c1ea4e',  // Verde claro para "Fabrica de contenidos"
+              '#228673'   // Verde para "Softskills"
+            ]
+          }]
+        };
+        var options = {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            }
+          }
+        };
+        new Chart(ctx, {
+          type: 'bar',
+          data: data,
+          options: options
+        });
+      }
+
+      google.script.run.withSuccessHandler(function(categories) {
+        displayCategories(categories);
+        var total = categories.reduce((acc, category) => acc + category.total, 0) / categories.length;
+        renderChart(total);
+
+        // Prepare data for bar chart
+        var categoryNames = categories.map(category => category.categoria);
+        var categoryPercentages = categories.map(category => category.porcentaje);
+        renderBarChart(categoryNames, categoryPercentages);
+      }).getGobernanzaData();
+    </script>
+  </body>
+</html>

@@ -5,7 +5,16 @@ function doGet(e) {
     return HtmlService.createHtmlOutputFromFile('Gobernanza');
   } else if (e && e.parameter && e.parameter.page == 'cultura') {
     return HtmlService.createHtmlOutputFromFile('Cultura');
-  } else {
+  } else if (e && e.parameter && e.parameter.page == 'nom') {
+    return HtmlService.createHtmlOutputFromFile('Nom');
+  } else if (e && e.parameter && e.parameter.page == 'softskills') {
+    return HtmlService.createHtmlOutputFromFile('Softskills');
+  } else if (e && e.parameter && e.parameter.page == 'tecnico') {
+    return HtmlService.createHtmlOutputFromFile('Tecnico');
+  } else if (e && e.parameter && e.parameter.page == 'fabrica') {
+    return HtmlService.createHtmlOutputFromFile('Fabrica');
+  } 
+  else {
     return HtmlService.createHtmlOutputFromFile('Index');
   }
 }

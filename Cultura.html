@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.cdnfonts.com/css/delight-candles" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script>
+    function onLoad() {
+      google.script.run.withSuccessHandler(displayCards).getGovernanceCultureDataForClient();
+      google.script.run.withSuccessHandler(drawChart).getCulturePercentageForClient();
+    }
+
+    function displayCards(data) {
+      var container = document.getElementById('cards-container');
+      container.innerHTML = '';
+
+      data.forEach(function(item) {
+        var card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h3>${item.nombreProyecto}</h3>
+          <p>Responsable: ${item.responsable}</p>
+          <p>Objetivos y Alcances: ${item.objetivosAlcances}</p>
+          <p>Porcentaje: ${item.porcentaje}</p>
+          <div class="progress-bar">
+            <div class="progress" style="width: ${item.porcentaje}%; background-color: orange;"></div>
+          </div>
+        `;
+        card.onclick = function() {
+          openModal(item);
+        };
+        container.appendChild(card);
+      });
+    }
+
+    function openModal(item) {
+      var isEdit = item !== undefined;
+      document.getElementById('modal-id').value = isEdit ? item.id : '';
+      document.getElementById('modal-nombre-proyecto').value = isEdit ? item.nombreProyecto : '';
+      document.getElementById('modal-desarrollo').value = isEdit ? item.desarrolloInternoExterno : '';
+      document.getElementById('modal-responsable').value = isEdit ? item.responsable : '';
+      document.getElementById('modal-objetivos-alcances').value = isEdit ? item.objetivosAlcances : '';
+      document.getElementById('modal-estrategia').value = isEdit ? item.estrategia : '';
+      document.getElementById('modal-logistica-pt').value = isEdit ? item.logisticaPT : '';
+      document.getElementById('modal-logistica-calendario').value = isEdit ? item.logisticaCalendario : '';
+      document.getElementById('modal-logistica-invitaciones').value = isEdit ? item.logisticaInvitaciones : '';
+      document.getElementById('modal-logistica-appsheet-id').value = isEdit ? item.logisticaAppsheetID : '';
+      document.getElementById('modal-diseno').value = isEdit ? item.diseno : '';
+      document.getElementById('modal-implementacion-lista-participantes').value = isEdit ? item.implementacionListaParticipantes : '';
+      document.getElementById('modal-implementacion-contratos').value = isEdit ? item.implementacionContratos : '';
+      document.getElementById('modal-implementacion-solicitud-pago').value = isEdit ? item.implementacionSolicitudPago : '';
+      document.getElementById('modal-monitoreo-encuesta-satisfaccion').value = isEdit ? item.monitoreoEncuestaSatisfaccion : '';
+      document.getElementById('modal-monitoreo-evaluacion-conocimientos').value = isEdit ? item.monitoreoEvaluacionConocimientos : '';
+      document.getElementById('modal-cierre-reporte-final').value = isEdit ? item.cierreReporteFinal : '';
+      document.getElementById('modal-cierre-comprobante-pago').value = isEdit ? item.cierreComprobantePago : '';
+      document.getElementById('modal-comentarios').value = isEdit ? item.comentarios : '';
+      document.getElementById('modal-porcentaje').value = isEdit ? item.porcentaje : 0;
+      document.getElementById('modal').dataset.isEdit = isEdit;
+      document.getElementById('modal-container').style.display = 'flex';
+    }
+
+    function saveChanges() {
+  var isEdit = document.getElementById('modal').dataset.isEdit === 'true';
+  var data = {
+    id: document.getElementById('modal-id').value,
+    nombreProyecto: document.getElementById('modal-nombre-proyecto').value,
+    desarrolloInternoExterno: document.getElementById('modal-desarrollo').value,  // Capturar el valor del campo "Desarrollo Interno o Externo"
+    responsable: document.getElementById('modal-responsable').value,
+    objetivosAlcances: document.getElementById('modal-objetivos-alcances').value,
+    estrategia: document.getElementById('modal-estrategia').value,
+    logisticaPT: document.getElementById('modal-logistica-pt').value,
+    logisticaCalendario: document.getElementById('modal-logistica-calendario').value,
+    logisticaInvitaciones: document.getElementById('modal-logistica-invitaciones').value,
+    logisticaAppsheetID: document.getElementById('modal-logistica-appsheet-id').value,
+    diseno: document.getElementById('modal-diseno').value,
+    implementacionListaParticipantes: document.getElementById('modal-implementacion-lista-participantes').value,
+    implementacionContratos: document.getElementById('modal-implementacion-contratos').value,
+    implementacionSolicitudPago: document.getElementById('modal-implementacion-solicitud-pago').value,
+    monitoreoEncuestaSatisfaccion: document.getElementById('modal-monitoreo-encuesta-satisfaccion').value,
+    monitoreoEvaluacionConocimientos: document.getElementById('modal-monitoreo-evaluacion-conocimientos').value,
+    cierreReporteFinal: document.getElementById('modal-cierre-reporte-final').value,
+    cierreComprobantePago: document.getElementById('modal-cierre-comprobante-pago').value,
+    comentarios: document.getElementById('modal-comentarios').value,  // Capturar el valor del campo "Comentarios"
+    porcentaje: document.getElementById('modal-porcentaje').value
+  };
+
+  if (isEdit) {
+    google.script.run.withSuccessHandler(onActionComplete).handleUpdate(data);
+  } else {
+    google.script.run.withSuccessHandler(onActionComplete).handleAdd(data);
+  }
+}
+
+
+    function deleteEntry() {
+      document.getElementById('confirm-delete-container').style.display = 'flex';
+    }
+
+    function confirmDelete() {
+      var id = document.getElementById('modal-id').value;
+      google.script.run.withSuccessHandler(onActionComplete).handleDelete(id);
+      document.getElementById('confirm-delete-container').style.display = 'none';
+    }
+
+    function cancelDelete() {
+      document.getElementById('confirm-delete-container').style.display = 'none';
+    }
+
+    function closeModal() {
+      document.getElementById('modal-container').style.display = 'none';
+    }
+
+    function openAddModal() {
+      openModal(); // Open the modal with empty fields
+    }
+
+    function onActionComplete() {
+      closeModal(); // Cerrar el modal
+      onLoad(); // Vuelve a cargar los datos para reflejar los cambios
+    }
+
+    function drawChart(percentage) {
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(function() {
+        var data = google.visualization.arrayToDataTable([
+          ['Task', 'Percentage'],
+          ['Porcentaje ya trabajado', percentage],
+          ['Porcentaje restante', 100 - percentage]
+        ]);
+
+        var options = {
+          pieHole: 0.4,
+          colors: ['#ff6f20', '#dcdcdc'],  // Color naranja para el porcentaje trabajado
+          legend: {
+            position: 'bottom'
+          },
+          chartArea: {
+            width: '90%',
+            height: '80%'
+          },
+          responsive: true
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
+        chart.draw(data, options);
+      });
+    }
+
+    window.onload = onLoad;
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+      var modalContainer = document.getElementById('modal-container');
+      var confirmDeleteContainer = document.getElementById('confirm-delete-container');
+      if (event.target == modalContainer) {
+        closeModal();
+      } else if (event.target == confirmDeleteContainer) {
+        cancelDelete();
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: "Work Sans", sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://raw.githubusercontent.com/Alangh0011/Gobernanza-Appscript/main/images/Fondo%20(1).png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 20px auto;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    h1 {
+        font-family: 'Delight Candles', sans-serif;
+        font-size: 3rem;
+        font-weight: 600;
+        color: #401051;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .add-button, .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background-color: #e50695;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .add-button:hover {
+      background-color: #401051;
+    }
+    .back-button:hover {
+      background-color: #401051;
+    }
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.2s;
+    cursor: pointer;
+    max-height: 180px; /* Limitar la altura máxima de la tarjeta */
+    overflow: hidden;  /* Esconder el desbordamiento */
+    background-image: url('https://raw.githubusercontent.com/Alangh0011/Gobernanza-Appscript/main/images/card-horizontal/Tarjeta%20horizontal.png'); /* Imagen de fondo */
+    background-size: cover; /* Ajustar la imagen de fondo */
+    background-position: center; /* Centrar la imagen */
+  }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    .card p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #555;
+       white-space: nowrap; /* Evita el salto de línea */
+      overflow: hidden;    /* Oculta el texto que se desborda */
+      text-overflow: ellipsis; /* Agrega "..." al final del texto que se corta */
+    }
+    /* Ajuste para pantallas más pequeñas */
+    @media only screen and (max-width: 768px) {
+      .card {
+        max-height: 150px;
+      }
+    }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background-color: #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress {
+      height: 100%;
+      background-color: #ff6f20;
+    }
+    #modal-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #modal {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+      max-height: 90%;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    #modal label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #modal input, #modal textarea {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #modal button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #modal .save-button {
+      background-color: #228673;
+      color: white;
+    }
+    #modal .save-button:hover {
+      background-color: #228673;
+    }
+    #modal .cancel-button {
+      background-color: #6c757d;
+      color: white;
+      margin-left: 10px;
+    }
+    #modal .cancel-button:hover {
+      background-color: #5a6268;
+    }
+    #modal .delete-button {
+      background-color: #ff3ea2;
+      color: white;
+      margin-left: auto;
+    }
+    #modal .delete-button:hover {
+      background-color: #f150a1;
+    }
+    #confirm-delete-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1100;
+    }
+    #confirm-delete {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    #confirm-delete button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #confirm-delete .confirm-button {
+      background-color: #dc3545;
+      color: white;
+    }
+    #confirm-delete .confirm-button:hover {
+      background-color: #c82333;
+    }
+    #confirm-delete .cancel-button {
+      background-color: #742280;
+      color: white;
+      margin-left: 10px;
+    }
+    #confirm-delete .cancel-button:hover {
+      background-color: #81388c;
+    }
+     #donutchart {
+    width: 100%;
+    height: 600px; /* Tamaño grande por defecto */
+    max-width: 700px; /* Máximo para pantallas grandes */
+    margin-top: 20px;
+    justify-content: center;
+    justify-content: center;
+    align-items: center;
+  }
+  /* Ajustes para pantallas más pequeñas */
+  @media only screen and (max-width: 1200px) {
+    #donutchart {
+      height: 500px;
+      max-width: 600px;
+    }
+  }
+  @media only screen and (max-width: 768px) {
+    #donutchart {
+      height: 400px;
+      max-width: 500px;
+    }
+  }
+  @media only screen and (max-width: 480px) {
+    #donutchart {
+      height: 300px; /* Tamaño más pequeño para móviles */
+      max-width: 400px;
+    }
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+     <h1>Gobernanza de los proyectos de Cultura</h1>
+    <button class="add-button" onclick="openAddModal()">+ Agregar</button>
+    <div id="cards-container" class="cards-container"></div>
+  </div>
+  <div id="donutchart"></div>
+  <div id="modal-container">
+    <div id="modal">
+      <input type="hidden" id="modal-id">
+      <label>Nombre del proyecto:</label>
+      <input type="text" id="modal-nombre-proyecto"><br>
+      <label>Desarrollo Interno o Externo:</label>
+      <input type="text" id="modal-desarrollo"><br>
+      <label>Responsable:</label>
+      <input type="text" id="modal-responsable"><br>
+      <label>Objetivos y Alcances:</label>
+      <textarea id="modal-objetivos-alcances"></textarea><br>
+      <label>Estrategia:</label>
+      <textarea id="modal-estrategia"></textarea><br>
+      <label>Logística - PT:</label>
+      <textarea id="modal-logistica-pt"></textarea><br>
+      <label>Logística - Calendario:</label>
+      <textarea id="modal-logistica-calendario"></textarea><br>
+      <label>Logística - Invitaciones:</label>
+      <textarea id="modal-logistica-invitaciones"></textarea><br>
+      <label>Logística - Appsheet/ID_Moodle:</label>
+      <textarea id="modal-logistica-appsheet-id"></textarea><br>
+      <label>Diseño:</label>
+      <textarea id="modal-diseno"></textarea><br>
+      <label>Implementación - Lista de participantes:</label>
+      <textarea id="modal-implementacion-lista-participantes"></textarea><br>
+      <label>Implementación - Contratos:</label>
+      <textarea id="modal-implementacion-contratos"></textarea><br>
+      <label>Implementación - Solicitud de pago:</label>
+      <textarea id="modal-implementacion-solicitud-pago"></textarea><br>
+      <label>Monitoreo y Seguimiento - Encuesta de satisfacción:</label>
+      <textarea id="modal-monitoreo-encuesta-satisfaccion"></textarea><br>
+      <label>Monitoreo y Seguimiento - Evaluación de conocimientos:</label>
+      <textarea id="modal-monitoreo-evaluacion-conocimientos"></textarea><br>
+      <label>Cierre - Reporte final:</label>
+      <textarea id="modal-cierre-reporte-final"></textarea><br>
+      <label>Cierre - Comprobante de pago:</label>
+      <textarea id="modal-cierre-comprobante-pago"></textarea><br>
+      <label>Comentarios:</label>
+      <textarea id="modal-comentarios"></textarea><br>
+      <label>Porcentaje:</label>
+      <input type="text" id="modal-porcentaje" readonly><br>
+      <div style="display: flex; justify-content: space-between;">
+        <button class="save-button" onclick="saveChanges()">Guardar</button>
+        <button class="cancel-button" onclick="closeModal()">Cancelar</button>
+        <button class="delete-button" onclick="deleteEntry()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+  <div id="confirm-delete-container">
+    <div id="confirm-delete">
+      <p>¿Seguro que quieres eliminar?</p>
+      <button class="confirm-button" onclick="confirmDelete()">Eliminar</button>
+      <button class="cancel-button" onclick="cancelDelete()">Cancelar</button>
+    </div>
+  </div>
+</body>
+</html>

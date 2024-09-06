@@ -33,7 +33,7 @@ function onEdit(e) {
   }
 
   // Verificar si la edición está en la hoja específica "Gobernanza - Normativos"
-  if (sheetName === "Gobernanza - Normativos") {
+  if (sheetName === "Gobernanza - Nom") {
     // Verificar si la edición está dentro del rango C2:Q
     if (row >= 2 && col >= 3 && col <= 18) {
       // Fórmula para calcular el porcentaje de celdas no vacías en el rango C2:Q
